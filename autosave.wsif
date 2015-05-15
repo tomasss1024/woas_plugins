@@ -12,6 +12,8 @@ woas.page.disposition: inline
 woas.page.boundary: DFQRCTsKlU
 
 --DFQRCTsKlU
+/* Autosave plugin */
+
 woas._create_wsif = function(author, pagename,pagecontent, encoding){
 	var extra = woas.wsif.header('wsif.version', woas.wsif.version)
 		+ woas.wsif.header('wsif.generator', 'woas')
