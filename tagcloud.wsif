@@ -1,0 +1,106 @@
+wsif.version: 1.4.0
+wsif.generator: woas
+wsif.generator.version: 0.13.0 Beta 1
+wsif.author: Tomas
+woas.pages: 2
+
+woas.page.title: WoaS::Plugins::Tagcloud
+woas.page.attributes: 0
+woas.page.encoding: 8bit/plain
+woas.page.disposition: inline
+woas.page.boundary: DFQRCTsKlU
+
+woas.macro.register('tom.tagcloud', function(macro,display_count,filter_string) {
+	var	reFindTags = /\[\[Tags?::([^\]]+)\]\]/g,
+		pg = [], tags, tag, alltags, counttags=[], maxctag=0,
+		src, i, il, j, jl, k, kl, tmp, filtering;
+	// filtering setup
+	if (typeof display_count == "undefined") display_count=false;
+
+	if (typeof filter_string != "undefined") {
+		filtering = woas.tagging._prepare_filter(filter_string);
+	} else {
+		filtering = false;
+	}
+	// scan all pages
+	for(i = 0, il = pages.length; i < il; ++i) {
+		if (woas.is_reserved(page_titles[i]))
+			continue;
+		src = woas.get_src_page(i);
+		// encrypted w/o key
+		if (src === null)
+			continue;
+		src.replace(reFindTags, function (str, $1) {
+				// get the tags and index the page under each tag
+				tmp = woas.parser.split_tags($1);
+				alltags = [];
+				for(j = 0, jl = tmp.length; j < jl; ++j) {
+					tag = woas.trim(tmp[j]);
+					// skip invalid tags
+					if (!tag.length) {
+						woas.log("WARNING: check your tag separators");
+						continue;
+					}
+					// call the filtering callback, if necessary
+					if (filtering) {
+						// skip this page from listing in case of negative filter result
+						if (!woas.tagging._filter_not_cb(tag))
+							break;
+					}
+					alltags.push(tag);
+					if (!counttags[tag]) counttags[tag]=1;
+					else counttags[tag]+=1;
+					maxctag=maxctag<counttags[tag]?counttags[tag]:maxctag;
+				}
+			});
+	} // scan pages loop
+	macro.text='<div style="text-align:justify;">';
+	for (var skey in counttags) {
+		if(counttags.hasOwnProperty(skey)) {
+			k=skey;
+			// generate size
+			macro.text+="<span style=\"font-size:"+(10+(10*(counttags[k]/maxctag)))+"px;\" >";
+			if(woas.get_namespace(current,false)=="Tagged::") {
+				skey+=",";
+				var gt=(current.indexOf(skey)>-1?current.replace(skey,""):current.concat(skey));
+				macro.text+="<a class=\"woas_"+(current.indexOf(skey)>-1?"u":"link")+"\" onClick='woas.go_to(\""+gt+"\");'>"+k.replace(' ','&nbsp;')+"</a>";
+			  }
+			else
+				macro.text+="<a class=\"woas_link\" onClick='woas.go_to(\"Tagged::"+skey+",\");'>"+skey.replace(' ','&nbsp;')+"</a>";
+			macro.text+=(display_count?" <span >("+counttags[k]+")</span>":"")+"</span> "; //style=\"display:none;\"
+		  }
+	}
+	macro.text+='</div>';
+	macro.reprocess=true;
+	return true;
+});
+--DFQRCTsKlU
+
+woas.page.title: Plug-in::Tagcloud::Help
+woas.page.attributes: 0
+woas.page.encoding: 8bit/plain
+woas.page.disposition: inline
+woas.page.boundary: DFQRCTsKlU
+
+--DFQRCTsKlU
+= Install
+import tagcloud.wsif and you can add to the bottom to your ::Menu
+{{{
+<<<tom.tagcloud():
+>>>
+}}}
+or if you want to see pages count to tags:
+{{{
+<<<tom.tagcloud(true):
+>>>
+}}}
+
+= Uninstall
+* delete from ::Menu
+{{{
+<<<tom.tagcloud():
+>>>
+}}}
+* delete plugin
+* delete Plug-in::Tagcloud::Help
+--DFQRCTsKlU
