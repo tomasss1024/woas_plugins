@@ -1,0 +1,143 @@
+wsif.version: 1.3.1
+wsif.generator: woas
+wsif.generator.version: 0.12.0
+woas.author: FBnil, tomas
+woas.pages: 2
+
+--DFQRCTsKlU
+woas.page.title: WoaS::Plugins::Autosave
+woas.page.attributes: 0
+woas.page.encoding: 8bit/plain
+woas.page.disposition: inline
+woas.page.boundary: DFQRCTsKlU
+
+--DFQRCTsKlU
+/* Autosave plugin */
+
+woas._create_wsif = function(author, pagename,pagecontent, encoding){
+	var extra = woas.wsif.header('wsif.version', woas.wsif.version)
+		+ woas.wsif.header('wsif.generator', 'woas')
+		+ woas.wsif.header('wsif.generator.version', woas.version)
+		+ woas.wsif.header('woas.pages', 1);
+	if (author.length)
+		extra += woas.wsif.header('woas.author', author);
+        var reB = new RegExp("\\n--"+boundary);
+	var	boundary = woas.wsif._generate_random_boundary("QUICKSAVED", pagecontent, reB);
+	var pi = woas.page_index(pagename);
+	var pfx = "woas.page.";
+	var record = woas.wsif.header(pfx+"title", woas.ecma_encode(pagename))+
+		woas.wsif.header(pfx+"attributes", page_attrs[pi]);
+	if (woas.config.store_mts && (page_mts[pi] !== 0))
+		record += woas.wsif.header(pfx+"last_modified", page_mts[pi]);
+	record += woas.wsif.header(pfx+"encoding", encoding)
+		+ woas.wsif.header(pfx+"disposition", "inline")
+		+ woas.wsif.header(pfx+"boundary", boundary)
++pagecontent+"\n--"+boundary;
+//		+ woas.wsif.inline(boundary, pagecontent);
+
+	return extra + "\n" + record;
+}
+
+woas._quicksave = function(filename,pagename,pagecontent){
+	if(!woas.ui.edit_mode)return false;
+	if(!filename)filename="quicksave.wsif";
+	if(!pagename)pagename=d$("wiki_page_title").value;
+	if(!pagecontent)pagecontent=woas.get_raw_content();
+//	woas.progress_init("quicksave");
+	var result = woas.save_file(woas.ROOT_DIRECTORY+filename, woas.file_mode.UTF8_TEXT,woas._create_wsif("quicksave", pagename, pagecontent, "8bit/plain"));
+//	woas.progress_finish();
+	if (!result){
+		alert("Quicksave failed!");
+		return false;
+	}
+	return true;
+}
+
+function AUTOSAVE(){
+	if(woas.page_index("WoaS::Plugins::Autosave")==-1){
+		woas.log("AUTOSAVE: terminated");
+		return;
+	}
+	if(document.body){
+		if(woas.ui.edit_mode)
+			woas._quicksave();
+	}
+	window.setTimeout( function(){ AUTOSAVE(); }, 10000); //300000 is 5 minutes
+}
+AUTOSAVE();
+--DFQRCTsKlU
+
+woas.page.title: Plug-in::Autosave::Help
+woas.page.attributes: 0
+woas.page.encoding: 8bit/plain
+woas.page.disposition: inline
+woas.page.boundary: DFQRCTsKlU
+
+--DFQRCTsKlU
+= Autosave
+The [[WoaS::Plugins::Autosave|Autosave plug-in]] automatically backs up the contents of the page you are currently editing every five minutes to a file named *quicksave.wsif* in the same directory as this wiki. That way if your browser crashes before you can save the page, you can import the quicksave.wsif file to restore the most recent backup of the page.
+== Configuration
+You can change the interval from five minutes to whatever length of time you prefer by editing the plug-in:
+# Open the ([[WoaS::Plugins]]) page.<br><br>
+# Click the *Edit...* link next to the *Autosave* plug-in entry.<br><br>
+# Find this line:<br>{{{
+window.setTimeout( function(){ AUTOSAVE(); }, 300000); //300000 is 5 minutes
+}}}
+# Change the first 300000 on that line to whatever number you would like to use \
+(<a id="displayfoldtextblock" href="javascript:togglefoldblock();">show chart</a>).<div id="togglefoldtextblock" style="display: none"><br><table class="autosavechart" cellspacing="0"><tr><th colspan="2">/Possible intervals/</th></tr><tr><td>*INTERVAL*</td><td>*DURATION*</td></tr><tr><td>10000</td><td>10 seconds</td></tr><tr><td>30000</td><td>30 seconds</td></tr><tr><td>60000</td><td>1 minute</td></tr><tr><td>120000</td><td>2 minutes</td></tr><tr><td>180000</td><td>3 minutes</td></tr><tr><td>240000</td><td>4 minutes</td></tr><tr><td>300000</td><td>5 minutes</td></tr><tr><td>360000</td><td>6 minutes</td></tr><tr><td>420000</td><td>7 minutes</td></tr><tr><td>480000</td><td>8 minutes</td></tr><tr><td>540000</td><td>9 minutes</td></tr><tr><td>600000</td><td>10 minutes</td></tr></table></div>\
+<blockquote>For example, 60000 is 1 minute, so if you'd like the interval to be 1 minute, the edited line would look like this:<br>{{{
+window.setTimeout( function(){ AUTOSAVE(); }, 60000); //300000 is 5 minutes
+}}}</blockquote>
+# Click the *Save* icon in the navigation bar to save the change.<br><br>
+# Reload the wiki.
+
+== Use
+If the browser crashes while you're editing a page:
+# Solve the crash problem and/or make sure you can open your browser again.
+# Open the wiki in the browser.
+# Click the *Advanced* icon in the navigation bar.
+# Click the [[Special::ImportWSIF]] link in the *Maintenance* section of the page.
+# Make sure that *Overwrite* or *Ask before overwrite* is selected in the *Existing pages* section of the page.
+# Check that the settings in the *Security* section of the page are the way you would like them to be.
+# Click the *Browse...* button.
+# Browse to the *quicksave.wsif* file in the same directory as the wiki.
+# Click the *Open* or *OK* button.
+# Click the *Import WSIF* button.
+The most recently saved version of the page you were editing when the browser crashed will now have been restored.
+== Removal
+# Delete the *Autosave* plug-in from the ([[WoaS::Plugins]]) page.
+# Delete this [[Plug-in::Autosave::Help]] page.
+# Reload the wiki.
+
+== Support
+this version of autosave plugin:
+[[https://github.com/tomasss1024/woas_plugins|github.com]]
+old version:
+[[mailto://littlergirl@gmail.com?subject=WoaS Autosave plug-in|Send an email to Little Girl]] with comments, corrections, questions, or suggestions.
+
+<script type="text/javascript"> 
+// THIS FUNCTION MAKES THE FOLDING CHART ON THIS PAGE WORK
+function togglefoldblock() {
+	var ele = document.getElementById("togglefoldtextblock");
+	var text = document.getElementById("displayfoldtextblock");
+	if(ele.style.display == "block") {
+    		ele.style.display = "none";
+		text.innerHTML = "show chart";
+  	}
+	else {
+		ele.style.display = "block";
+		text.innerHTML = "hide chart";
+	}
+} 
+</script>
+<style type="text/css">
+.autosavechart th {
+	border: 0;
+	text-align: center;
+	}
+.autosavechart td {
+	border: 1px solid #000000;
+	}
+</style>
+
+--DFQRCTsKlU
