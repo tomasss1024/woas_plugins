@@ -42,11 +42,8 @@ woas._quicksave = function(filename,pagename,pagecontent){
 	if(!pagename)pagename=d$("wiki_page_title").value;
 	if(!pagecontent)pagecontent=woas.get_raw_content();
 //	woas.progress_init("quicksave");
-woas.log("hello1");
-
 	var result = woas.save_file(woas.ROOT_DIRECTORY+filename, woas.file_mode.UTF8_TEXT,woas._create_wsif("quicksave", pagename, pagecontent, "8bit/plain"));
 //	woas.progress_finish();
-woas.log("hello2");
 	if (!result){
 		alert("Quicksave failed!");
 		return false;
