@@ -12,20 +12,41 @@ woas.page.disposition: inline
 woas.page.boundary: DFQRCTsKlU
 
 --DFQRCTsKlU
-/* Autosave plugin */
-
 woas._create_wsif = function(author, pagename,pagecontent, encoding){
-return pagecontent;
+	var extra = woas.wsif.header('wsif.version', woas.wsif.version)
+		+ woas.wsif.header('wsif.generator', 'woas')
+		+ woas.wsif.header('wsif.generator.version', woas.version)
+		+ woas.wsif.header('woas.pages', 1);
+	if (author.length)
+		extra += woas.wsif.header('woas.author', author);
+        var reB = new RegExp("\\n--"+boundary);
+	var	boundary = woas.wsif._generate_random_boundary("QUICKSAVED", pagecontent, reB);
+	var pi = woas.page_index(pagename);
+	var pfx = "woas.page.";
+	var record = woas.wsif.header(pfx+"title", woas.ecma_encode(pagename))+
+		woas.wsif.header(pfx+"attributes", page_attrs[pi]);
+	if (woas.config.store_mts && (page_mts[pi] !== 0))
+		record += woas.wsif.header(pfx+"last_modified", page_mts[pi]);
+	record += woas.wsif.header(pfx+"encoding", encoding)
+		+ woas.wsif.header(pfx+"disposition", "inline")
+		+ woas.wsif.header(pfx+"boundary", boundary)
++"\n"+pagecontent+"\n--"+boundary+"\n";
+//		+ woas.wsif.inline(boundary, pagecontent);
+
+	return extra + "\n" + record;
 }
 
 woas._quicksave = function(filename,pagename,pagecontent){
 	if(!woas.ui.edit_mode)return false;
-	if(!filename)filename="quicksave.txt";
+	if(!filename)filename="quicksave.wsif";
 	if(!pagename)pagename=d$("wiki_page_title").value;
 	if(!pagecontent)pagecontent=woas.get_raw_content();
 //	woas.progress_init("quicksave");
+woas.log("hello1");
+
 	var result = woas.save_file(woas.ROOT_DIRECTORY+filename, woas.file_mode.UTF8_TEXT,woas._create_wsif("quicksave", pagename, pagecontent, "8bit/plain"));
 //	woas.progress_finish();
+woas.log("hello2");
 	if (!result){
 		alert("Quicksave failed!");
 		return false;
@@ -74,10 +95,15 @@ window.setTimeout( function(){ AUTOSAVE(); }, 60000); //300000 is 5 minutes
 == Use
 If the browser crashes while you're editing a page:
 # Solve the crash problem and/or make sure you can open your browser again.
-# Open the *quicksave.txt* file in the same directory as the wiki
-# Copy text in the file
-# Edit your last page and paste it in to the textarea
-# Save page
+# Open the wiki in the browser.
+# Click the *Advanced* icon in the navigation bar.
+# Click the [[Special::ImportWSIF]] link in the *Maintenance* section of the page.
+# Make sure that *Overwrite* or *Ask before overwrite* is selected in the *Existing pages* section of the page.
+# Check that the settings in the *Security* section of the page are the way you would like them to be.
+# Click the *Browse...* button.
+# Browse to the *quicksave.wsif* file in the same directory as the wiki.
+# Click the *Open* or *OK* button.
+# Click the *Import WSIF* button.
 The most recently saved version of the page you were editing when the browser crashed will now have been restored.
 == Removal
 # Delete the *Autosave* plug-in from the ([[WoaS::Plugins]]) page.
