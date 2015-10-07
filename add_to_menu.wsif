@@ -1,0 +1,133 @@
+wsif.version: 1.3.1
+wsif.generator: woas
+wsif.generator.version: 0.12.0
+woas.author: Tomas
+woas.pages: 2
+
+--DFQRCTsKlU
+woas.page.title: WoaS::Plugins::Add to menu
+woas.page.attributes: 0
+woas.page.encoding: 8bit/plain
+woas.page.disposition: inline
+woas.page.boundary: DFQRCTsKlU
+
+--DFQRCTsKlU
+woas._new_page_direct_ = woas._new_page_direct;
+woas._new_page_direct = function(title, fill_mode) {
+	// properly split page title in (namespace, title) -> (ns, cr)
+	var ns = this.get_namespace(title, true), cr;
+	if (ns.length) {
+		cr = title.substr(ns.length);
+		ns = ns.substr(0, ns.length-2);
+	} else cr = title;
+
+	// check if page deserves creation
+	if ((ns==="File") || (ns==="Image")) {
+		this.go_to(title);
+		return title;
+	}
+	// create and edit the new page
+	var ct;
+	if (cr !== "Menu")
+		ct = "= "+cr+"\n";
+	else
+		ct = "\n";
+	this._create_page_direct(ns, cr, fill_mode, ct);
+
+	return title;
+};
+
+woas.add_to_menu = function() {
+	var title = current;
+
+	var ns = this.get_namespace(title, true), cr;
+	if (ns.length) {
+		cr = title.substr(ns.length);
+		ns = ns.substr(0, ns.length-2);
+	} else cr = title;
+
+	var upd_menu = (cr==='Menu');
+	if (!upd_menu && confirm(this.i18n.ASK_MENU_LINK)) {
+		var menu = this.get_text("::Menu");
+		// try to put the menu link in a good position
+		p = menu.indexOf("\n\n");
+		if (p === -1)
+			menu += "\n[["+title+"]]";
+		else
+			menu = menu.substring(0,p+2)+"[["+title+"]]\n"+menu.substring(p+2);
+		this.set__text(this.page_index("::Menu"), menu);
+		upd_menu = true;
+	}
+	else {
+		this.alert(this.i18n.INVALID_SPECIAL);
+	}
+	if (upd_menu)
+		this.refresh_menu_area();
+};
+
+--DFQRCTsKlU
+woas.page.title: Plug-in::Add to menu::Help
+woas.page.attributes: 0
+woas.page.encoding: 8bit/plain
+woas.page.disposition: inline
+woas.page.boundary: DFQRCTsKlU
+
+--DFQRCTsKlU
+<script type="text/javascript">
+/* <![CDATA[ */
+function AddAddToMenuButton()
+	{
+		// CHECK FOR ELEMENTS
+		if ( (document.getElementById('addtomenu_button')) )
+			{
+			// ALERT ME IF ANY OF THEM EXIST
+			alert('Nothing to do - one or more items already exist!');
+			}
+		else
+			{
+			// ADD BUTTON ROW
+			var MY_ADDTOMENUBUTTON_SPAN=document.createElement("span");
+			MY_ADDTOMENUBUTTON_SPAN.setAttribute("id", "addtomenu_span");
+			MY_ADDTOMENUBUTTON_SPAN.innerHTML='&nbsp;|&nbsp;';
+			var MY_ADDTOMENUBUTTON_A=document.createElement("a");
+			MY_ADDTOMENUBUTTON_A.setAttribute("id", "addtomenu_button");
+			MY_ADDTOMENUBUTTON_A.style.color="blue";
+			MY_ADDTOMENUBUTTON_A.onclick=function() { woas.add_to_menu() };
+			var MY_ADDTOMENUBUTTON_TEXT=document.createTextNode("Add to menu");
+			MY_ADDTOMENUBUTTON_A.appendChild(MY_ADDTOMENUBUTTON_TEXT);
+			MY_ADDTOMENUBUTTON_SPAN.appendChild(MY_ADDTOMENUBUTTON_A);
+			document.getElementById("woas_edit_page_title").appendChild(MY_ADDTOMENUBUTTON_SPAN);
+			// SAVE CHANGES
+			woas.full_commit();
+			// ALERT ME THAT IT'S DONE
+			alert('Screenplay writing buttons have been added to the editor.');
+			}
+	}
+
+// ================================= BEGIN SCREENPLAY BUTTON ROW REMOVING CODE =================================
+function RemoveAddToMenuButton()
+	{
+		// CHECK FOR ELEMENTS
+		if ((!document.getElementById('addtomenu_button')))
+			{
+			// ALERT ME IF ANY OF THEM DON'T EXIST
+			alert('Nothing to do - one or more items do not exist!');
+			}
+		else
+			{
+			// REMOVE THEM IF ALL OF THEM DO EXIST
+			document.getElementById('addtomenu_span').removeChild(document.getElementById('addtomenu_button'));
+			document.getElementById('woas_edit_page_title').removeChild(document.getElementById('addtomenu_span'));
+			// SAVE THE CHANGES
+			woas.full_commit();
+			// ALERT ME
+			alert('The Add to menu button have been removed from the editor.');
+			}
+	}
+/* ]]> */
+</script>
+Add:
+Click this button: <input class="woas_button" type="button" value="Add Add to menu buttons to the editor!" onclick="AddAddToMenuButton();" title="Add Add menu button writing buttons to the editor."><br><br>
+Remove:
+Click this button: <input class="woas_button" type="button" value="Remove Add to menu buttons from the editor!" onclick="RemoveAddToMenuButton();" title="Remove Add menu button from the editor."><br><br>
+--DFQRCTsKlU 
