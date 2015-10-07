@@ -1,0 +1,78 @@
+wsif.version: 1.4.0
+wsif.generator: woas
+wsif.generator.version: 0.13.0 Beta 2
+wsif.author: Tomas
+woas.pages: 3
+
+--DFQRCTsKlU
+woas.page.title: WoaS::Plugins::Replace Chords
+woas.page.attributes: 0
+woas.page.encoding: 8bit/plain
+woas.page.disposition: inline
+woas.page.boundary: DFQRCTsKlU
+
+--DFQRCTsKlU
+// Replace chords plug-in
+// by Tomas
+// thanks to Little Girl - replace plugin
+// thanks to pixy - chords formating (http://wellstyled.com/css-chords-formatting.html)
+// See the Plug-in::Replace Chords::Help page for instructions and an example.
+
+woas.macro.register('chords', function(macro) {
+macro.text=macro.text.replace(/[\[{]([\w#\+\*\d/]+)[\]}]([\u0080-\uFFFF\w]*)([\s,\.]*)/g, function(mstr,$1,$2,$3) {var w='';if($1.length>$2.length) for(c in $1)(($2.length&&!$3.length)?w+='&middot;':w+='&nbsp;');return '<span><strong><span>{</span>[[Chord::'+$1+'|'+$1+']]<span>}</span></strong>'+$2+w+$3+'</span>';}); 
+macro.text = '[[Include::Plug-in::Replace Chords::CSS]]<div class="chordline">'+macro.text+'</div>'; 
+macro.reprocess = true; 
+return true; 
+});
+--DFQRCTsKlU
+woas.page.title: Plug-in::Replace Chords::CSS
+woas.page.attributes: 0
+woas.page.encoding: 8bit/plain
+woas.page.disposition: inline
+woas.page.boundary: DFQRCTsKlU
+
+--DFQRCTsKlU
+<style type="text/css">.chordline {line-height:2.5} .chordline span {position:relative;} .chordline span strong { position:absolute;top:-1em; left:0;font:bold 75%/1 sans-serif;color:green;}.chordline span strong span { display:none; }</style>
+--DFQRCTsKlU
+woas.page.title: Plug-in::Replace Chords::Help
+woas.page.attributes: 0
+woas.page.encoding: 8bit/plain
+woas.page.disposition: inline
+woas.page.boundary: DFQRCTsKlU
+
+--DFQRCTsKlU
+= Replace Chords
+This plug-in reformats all chords in braces '{}' or square brackets '[]' and it makes Wiki link from them.
+== Install
+# You probably imported replace_chords.wsif in [[Special::ImportWSIF]]
+
+== Use
+== Example
+* Example:{{{
+<<<chords:
+{F}Yesterday 
+[Emi]all my [A7]troubles seemed so [Dmi]far away [Dmi/C]
+>>>
+}}}
+* Result:<br><br>
+<<<chords:
+{F}Yesterday 
+[Emi]all my [A7]troubles seemed so [Dmi]far away [Dmi/C]
+>>>
+== Customize the plug-in
+For customize the plug-in (ex.: change chord link):
+# Go to the [[WoaS::Plugins::Replace Chords]] page.<br><br>
+# Click the *Edit* icon in the navigation bar to edit the plug-in.<br><br>
+# Find this section in the page:{{{
+return '<span><strong><span>{</span>[[Chord::'+$1+'|'+$1+']]<span>}...
+}}}
+# Change {{{[[Chord::'+$1+'|'+$1+']]}}} to {{{[[Chords|'+$1+']]}}}
+# Save and reload Woas
+
+== Removal
+# Delete the *Replace Chords* plug-in from the ([[WoaS::Plugins]]) page.
+# Delete [[Plug-in::Replace Chords::CSS]] page.
+# Delete this [[Plug-in::Replace Chords::Help]] page.
+# Reload the wiki.
+
+--DFQRCTsKlU 
